@@ -1,0 +1,16 @@
+service: serverless-app
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  lambdaHashingVersion: '20201221'
+  region: us-east-1
+
+functions:
+  api:
+    handler: src/index.handler
+    events:
+      - httpApi:
+          path: /
+          method: get
