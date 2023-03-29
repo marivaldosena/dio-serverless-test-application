@@ -4,6 +4,9 @@ module.exports.handler = async (event) => {
   const dynamodb = new AWS.DynamoDB.DocumentClient();
   const { id } = event.pathParameters;
 
+  let jsonResponse;
+  let statusCode;
+
   let item;
 
   try {
@@ -13,12 +16,26 @@ module.exports.handler = async (event) => {
     }).promise();
     
     item = result.Item;
+
+    if (!item) {
+      throw new Error("Item not found");
+    };
+
+    jsonResponse = {
+      data: item,
+      status: "OK"
+    };
+    statusCode = 200;
   } catch(error) {
-    console.log(error);
+    jsonResponse = {
+      status: "NOT_FOUND",
+      message: "Item not found"
+    };
+    statusCode = 404;
   }
 
   return {
-    statusCode: 200,
-    body: JSON.stringify(item)
+    statusCode,
+    body: JSON.stringify(jsonResponse)
   }
 }

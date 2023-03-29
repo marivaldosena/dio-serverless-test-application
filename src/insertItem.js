@@ -7,20 +7,39 @@ module.exports.handler = async(event) => {
   const id = v4();
 
   const dynamodb = new AWS.DynamoDB.DocumentClient();
-  const newItem = {
-    id,
-    item: inputData.item,
-    createdAt,
-    itemStatus: false,
-  };
+  
+  let jsonResponse;
+  let statusCode;
 
-  await dynamodb.put({
-    TableName: "Store",
-    Item: newItem
-  }).promise();
+  try {
+    const newItem = {
+      id,
+      item: inputData.item,
+      createdAt,
+      itemStatus: false,
+    };
+
+    await dynamodb.put({
+      TableName: "Store",
+      Item: newItem
+    }).promise();
+
+    jsonResponse = {
+      data: newItem,
+      status: "CREATED"
+    };
+    statusCode = 200;
+  } catch(error) {
+    jsonResponse = {
+      status: "UNPROCESSABLE_ENTITY",
+      message: "Could not create resource."
+    }
+    statusCode = 422;
+  }
+
 
   return {
-    statusCode: 200,
-    body: JSON.stringify(newItem)
+    statusCode,
+    body: JSON.stringify(jsonResponse)
   };
 }
